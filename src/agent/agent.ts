@@ -14,6 +14,7 @@ import type {
   PageAgent,
   RuleSummary,
   ScanOptions,
+  ScanOutcome,
   ScanResult,
 } from '../shared/types'
 
@@ -80,7 +81,7 @@ const brief = (result: Result): RuleSummary => ({
   nodes: result.nodes.length,
 })
 
-async function scan(options: ScanOptions): Promise<ScanResult> {
+async function runScan(options: ScanOptions): Promise<ScanResult> {
   const started = performance.now()
   clear()
   if (options.lang === 'de') axe.configure({ locale: deLocale as unknown as Locale })
@@ -88,6 +89,8 @@ async function scan(options: ScanOptions): Promise<ScanResult> {
   const runOptions: RunOptions = {
     runOnly: { type: 'tag', values: [...getStandard(options.standard).tags] },
     resultTypes: ['violations', 'incomplete', 'passes'],
+    // only the top document is instrumented; do not wait for axe in child frames
+    iframes: false,
   }
   const results = await axe.run(document, runOptions)
   return {
@@ -101,6 +104,15 @@ async function scan(options: ScanOptions): Promise<ScanResult> {
     incomplete: results.incomplete.map(brief),
     elementCount: document.getElementsByTagName('*').length,
     durationMs: Math.round(performance.now() - started),
+  }
+}
+
+/** Never throws across the injection boundary: failures come back as data. */
+async function scan(options: ScanOptions): Promise<ScanOutcome> {
+  try {
+    return await runScan(options)
+  } catch (error) {
+    return { error: error instanceof Error ? `${error.name}: ${error.message}` : String(error) }
   }
 }
 

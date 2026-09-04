@@ -57,7 +57,9 @@ export function createIframeAdapter(getFrame: () => HTMLIFrameElement | null): P
       return { title: win.document.title, url: win.location.href }
     },
     async scan(options: ScanOptions): Promise<ScanResult> {
-      return (await agent()).scan(options)
+      const outcome = await (await agent()).scan(options)
+      if ('error' in outcome) throw new Error(outcome.error)
+      return outcome
     },
     async highlight(targets: HighlightTarget[]) {
       ;(await agent()).highlight(targets)

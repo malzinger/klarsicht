@@ -62,9 +62,16 @@ export interface HighlightTarget {
   readonly impact: Impact
 }
 
+/** Errors travel back across the injection boundary as data, never as exceptions. */
+export interface AgentError {
+  readonly error: string
+}
+
+export type ScanOutcome = ScanResult | AgentError
+
 /** API the agent exposes on `window.__klarsicht` inside the inspected page. */
 export interface PageAgent {
-  scan(options: ScanOptions): Promise<ScanResult>
+  scan(options: ScanOptions): Promise<ScanOutcome>
   highlight(targets: HighlightTarget[]): void
   clear(): void
 }

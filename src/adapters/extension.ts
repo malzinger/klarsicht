@@ -48,9 +48,10 @@ export const extensionAdapter: PageAdapter = {
         func: (opts: ScanOptions) => window.__klarsicht?.scan(opts),
         args: [options],
       })
-      const result = injection?.result
-      if (!result) throw new Error('generic')
-      return result
+      const outcome = injection?.result
+      if (!outcome) throw new Error('The page returned no result. Reload the page and try again.')
+      if ('error' in outcome) throw new Error(outcome.error)
+      return outcome
     })
   },
 

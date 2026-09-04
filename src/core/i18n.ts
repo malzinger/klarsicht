@@ -74,6 +74,8 @@ export function t(key: StringKey, lang: Lang): string {
 }
 
 /** Maps an adapter error code (e.g. "no-access") to a user-facing message. */
+export const isKnownError = (code: string): boolean => `error.${code}` in STRINGS
+
 export function errorText(code: string, lang: Lang): string {
   const key = `error.${code}` as StringKey
   return key in STRINGS ? STRINGS[key][lang] : STRINGS['error.generic'][lang]

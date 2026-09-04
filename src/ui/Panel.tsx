@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { PageAdapter, PageTarget } from '../adapters/types'
-import { errorText, t, type StringKey } from '../core/i18n'
+import { errorText, isKnownError, t, type StringKey } from '../core/i18n'
 import { buildHtmlReport, buildJsonReport, buildSummary } from '../core/report'
 import { computeScore, IMPACTS, sortFindings } from '../core/score'
 import { getStandard, STANDARDS } from '../core/standards'
@@ -208,6 +208,7 @@ export function Panel({ adapter, compact = false, autoScan = false }: PanelProps
         {status.kind === 'error' && (
           <div className="error" role="alert">
             <p>{errorText(status.code, lang)}</p>
+            {!isKnownError(status.code) && <code className="error__detail">{status.code}</code>}
             {status.code === 'no-access' && adapter.requestAccess && (
               <>
                 <button

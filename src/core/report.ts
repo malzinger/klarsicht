@@ -18,7 +18,7 @@ export function escapeHtml(value: string): string {
 }
 
 export function buildJsonReport(result: ScanResult): string {
-  return JSON.stringify({ tool: 'Klarsicht', version: '0.1.1', ...result }, null, 2)
+  return JSON.stringify({ tool: 'Klarsicht', version: '0.1.2', ...result }, null, 2)
 }
 
 /** Plain-text summary for the clipboard. */

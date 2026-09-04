@@ -1,7 +1,7 @@
 {
   "name": "klarsicht",
   "private": true,
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "description": "Accessibility checker for the web: scan any page against WCAG 2.2, highlight issues in place and get concrete code fixes. Chrome extension plus a live web demo.",
   "author": "Friedrich Malz",

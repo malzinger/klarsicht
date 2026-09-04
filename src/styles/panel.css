@@ -198,6 +198,13 @@ button {
   margin: 0 0 10px;
 }
 
+.error__detail {
+  display: block;
+  margin: -4px 0 8px;
+  font: 12px/1.4 var(--mono);
+  word-break: break-word;
+}
+
 .error__note {
   display: block;
   margin-top: 8px;
