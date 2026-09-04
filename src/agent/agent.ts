@@ -2,7 +2,7 @@
  * Page agent. Bundled as a classic script and injected into the inspected page
  * (extension) or a same-origin iframe (demo). Exposes `window.__klarsicht`.
  */
-import type { Locale, NodeResult, Result, RunOptions } from 'axe-core'
+import type { NodeResult, Result, RunOptions } from 'axe-core'
 import deLocale from 'axe-core/locales/de.json'
 import { getStandard } from '../core/standards'
 import type {
@@ -11,6 +11,7 @@ import type {
   FindingNode,
   HighlightTarget,
   Impact,
+  Lang,
   PageAgent,
   RuleSummary,
   ScanOptions,
@@ -27,6 +28,23 @@ const COLORS: Record<Impact, string> = {
   serious: '#ef6820',
   moderate: '#ca8a04',
   minor: '#2e90fa',
+}
+
+/**
+ * German rule texts come from axe's own locale file, applied as a lookup.
+ * axe.configure({ locale }) would compile message templates with `new Function`,
+ * which the extension CSP forbids inside content scripts.
+ */
+type RuleTexts = { readonly help?: string; readonly description?: string }
+const RULE_TEXTS_DE: Record<string, RuleTexts> =
+  (deLocale as { rules?: Record<string, RuleTexts> }).rules ?? {}
+
+function ruleTexts(result: Result, lang: Lang): { help: string; description: string } {
+  const localized = lang === 'de' ? RULE_TEXTS_DE[result.id] : undefined
+  return {
+    help: localized?.help ?? result.help,
+    description: localized?.description ?? result.description,
+  }
 }
 
 const flatten = (target: unknown): string[] =>
@@ -62,30 +80,27 @@ function toNode(node: NodeResult): FindingNode {
   }
 }
 
-function toFinding(result: Result): Finding {
+function toFinding(result: Result, lang: Lang): Finding {
   const impact = IMPACTS.includes(result.impact as Impact) ? (result.impact as Impact) : 'minor'
   return {
     id: result.id,
     impact,
-    help: result.help,
-    description: result.description,
+    ...ruleTexts(result, lang),
     helpUrl: result.helpUrl,
     tags: result.tags,
     nodes: result.nodes.map(toNode),
   }
 }
 
-const brief = (result: Result): RuleSummary => ({
+const brief = (result: Result, lang: Lang): RuleSummary => ({
   id: result.id,
-  help: result.help,
+  help: ruleTexts(result, lang).help,
   nodes: result.nodes.length,
 })
 
 async function runScan(options: ScanOptions): Promise<ScanResult> {
   const started = performance.now()
   clear()
-  if (options.lang === 'de') axe.configure({ locale: deLocale as unknown as Locale })
-  else axe.reset()
   const runOptions: RunOptions = {
     runOnly: { type: 'tag', values: [...getStandard(options.standard).tags] },
     resultTypes: ['violations', 'incomplete', 'passes'],
@@ -99,9 +114,9 @@ async function runScan(options: ScanOptions): Promise<ScanResult> {
     timestamp: new Date().toISOString(),
     lang: options.lang,
     standard: options.standard,
-    violations: results.violations.map(toFinding),
-    passes: results.passes.map(brief),
-    incomplete: results.incomplete.map(brief),
+    violations: results.violations.map((result) => toFinding(result, options.lang)),
+    passes: results.passes.map((result) => brief(result, options.lang)),
+    incomplete: results.incomplete.map((result) => brief(result, options.lang)),
     elementCount: document.getElementsByTagName('*').length,
     durationMs: Math.round(performance.now() - started),
   }

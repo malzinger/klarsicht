@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Klarsicht – Accessibility Checker",
   "short_name": "Klarsicht",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Scan any page against WCAG 2.2, see issues highlighted in place and get concrete code fixes. Ready for BFSG / EN 301 549.",
   "minimum_chrome_version": "116",
   "icons": {
