@@ -15,7 +15,7 @@
 - **Standards profiles.** WCAG 2.2 AA, WCAG 2.1 AA for BFSG / EN 301 549 (the German Accessibility Strengthening Act), or everything plus axe best practices.
 - **Reports.** Self-contained HTML report, JSON for pipelines, a text summary for the ticket. Rule texts in English or German, including the engine's own German locale.
 - **Score.** 100 minus a penalty per failing rule, weighted by impact and scaled logarithmically by affected elements. Grades A to D.
-- **Privacy by design.** Only the `activeTab` permission, no host permissions, no network calls, no analytics.
+- **Privacy by design.** `activeTab` by default, so a tab is only touched after you click the icon on it. Optionally grant host access once to scan any tab directly. No network calls, no analytics.
 
 ## Install
 

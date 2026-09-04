@@ -19,12 +19,17 @@ export const STRINGS = {
   },
   'state.scanning': { en: 'Scanning…', de: 'Prüfe…' },
   'error.no-access': {
-    en: 'No access to this tab yet. Click the Klarsicht icon in the toolbar to grant it, then scan again.',
-    de: 'Noch kein Zugriff auf diesen Tab. Klicke auf das Klarsicht-Symbol in der Symbolleiste und prüfe dann erneut.',
+    en: 'No access to this tab yet. Click the Klarsicht icon in the toolbar to release this tab, or allow access to websites once.',
+    de: 'Noch kein Zugriff auf diesen Tab. Klicke auf das Klarsicht-Symbol in der Symbolleiste, um diesen Tab freizugeben, oder erlaube den Zugriff auf Websites einmalig.',
   },
   'error.unsupported-page': {
     en: 'This page type cannot be scanned (browser pages, the Web Store, PDFs).',
     de: 'Dieser Seitentyp kann nicht geprüft werden (Browserseiten, Web Store, PDFs).',
+  },
+  'action.grant': { en: 'Allow access to websites', de: 'Zugriff auf Websites erlauben' },
+  'grant.note': {
+    en: 'Chrome asks once. Afterwards every tab can be scanned directly, still without any data leaving the browser.',
+    de: 'Chrome fragt einmal nach. Danach lässt sich jeder Tab direkt prüfen, weiterhin ohne dass Daten den Browser verlassen.',
   },
   'error.no-tab': { en: 'No active tab found.', de: 'Kein aktiver Tab gefunden.' },
   'error.generic': {

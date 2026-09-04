@@ -23,7 +23,7 @@ const FEATURES = [
   ],
   [
     'Privacy by design',
-    'Uses only the activeTab permission, runs entirely in your browser and never sends a byte anywhere.',
+    'Uses the activeTab permission by default, host access only if you grant it, runs entirely in your browser and never sends a byte anywhere.',
   ],
   [
     'Open source',

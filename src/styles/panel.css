@@ -194,6 +194,17 @@ button {
   color: #b42318;
 }
 
+.error p {
+  margin: 0 0 10px;
+}
+
+.error__note {
+  display: block;
+  margin-top: 8px;
+  font-size: 12px;
+  color: #912018;
+}
+
 /* ---------- buttons ---------- */
 
 .btn {

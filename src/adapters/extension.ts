@@ -65,6 +65,14 @@ export const extensionAdapter: PageAdapter = {
     )
   },
 
+  async requestAccess() {
+    try {
+      return await chrome.permissions.request({ origins: ['http://*/*', 'https://*/*'] })
+    } catch {
+      return false
+    }
+  },
+
   async clear() {
     const tab = await activeTab()
     await withAccess(() =>

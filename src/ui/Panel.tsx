@@ -139,6 +139,11 @@ export function Panel({ adapter, compact = false, autoScan = false }: PanelProps
     setToast(tr('copy.done'))
   }
 
+  const grantAndScan = async () => {
+    const granted = await adapter.requestAccess?.()
+    if (granted) await scan()
+  }
+
   const scanLabel =
     status.kind === 'scanning'
       ? tr('state.scanning')
@@ -201,9 +206,21 @@ export function Panel({ adapter, compact = false, autoScan = false }: PanelProps
       <div className="panel__body">
         {status.kind === 'idle' && <p className="empty">{tr('state.idle')}</p>}
         {status.kind === 'error' && (
-          <p className="error" role="alert">
-            {errorText(status.code, lang)}
-          </p>
+          <div className="error" role="alert">
+            <p>{errorText(status.code, lang)}</p>
+            {status.code === 'no-access' && adapter.requestAccess && (
+              <>
+                <button
+                  type="button"
+                  className="btn btn--small btn--accent"
+                  onClick={() => void grantAndScan()}
+                >
+                  {tr('action.grant')}
+                </button>
+                <span className="error__note">{tr('grant.note')}</span>
+              </>
+            )}
+          </div>
         )}
         {result && score && (
           <>

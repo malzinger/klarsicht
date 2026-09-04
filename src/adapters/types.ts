@@ -15,4 +15,6 @@ export interface PageAdapter {
   scan(options: ScanOptions): Promise<ScanResult>
   highlight(targets: HighlightTarget[]): Promise<void>
   clear(): Promise<void>
+  /** Asks the browser for optional host access so any tab can be scanned without re-clicking the icon. */
+  requestAccess?(): Promise<boolean>
 }
