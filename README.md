@@ -67,10 +67,31 @@ npm run lint       # ESLint with the React Compiler rules
 
 `dist/` is both the unpacked extension and the static site. CI runs lint, format check, typecheck, tests, build and pack on every push, deploys the landing page to GitHub Pages from `main`, and attaches the zip to a GitHub release for every `v*` tag.
 
+## CI gate
+
+The same agent runs headless through Playwright, so a pull request can be gated on its accessibility score. The action scans a URL, posts a comment with score, findings table and the top fixes, uploads the HTML and JSON reports as an artifact and fails below the threshold:
+
+```yaml
+- uses: malzinger/klarsicht@v1
+  with:
+    url: https://preview.example.com
+    threshold: 90
+```
+
+Inputs: `url`, `standard` (`wcag22aa`, `wcag21aa`, `wcag22aa-bp`), `threshold`, `lang`, `comment`, `token`. Outputs: `score`, `grade`, `passed`. This repository gates itself: every pull request scans the built landing page (see `.github/workflows/a11y-gate.yml`).
+
+The CLI works on its own as well:
+
+```bash
+npm run build
+node cli/klarsicht.js https://example.com --standard wcag21aa --threshold 90 --lang de
+```
+
+It prints a findings table, writes HTML, JSON and Markdown reports to `klarsicht-out/` and exits with 1 below the threshold. `--channel msedge` or `--channel chrome` uses an installed browser instead of Playwright's bundled Chromium.
+
 ## Roadmap
 
 - Chrome Web Store listing and a Firefox port (the agent is plain DOM code, only the adapter differs)
-- CLI mode: the same agent run headlessly with Playwright for CI gates
 - Diff two scans to show what a deploy changed
 - Optional AI explanations for the long tail of rules without a template
 

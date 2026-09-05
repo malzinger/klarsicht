@@ -3,6 +3,8 @@ import { Panel } from './Panel'
 
 const REPO = 'https://github.com/malzinger/klarsicht'
 const ZIP = `${REPO}/releases/latest/download/klarsicht-extension.zip`
+const SNIPPET =
+  '- uses: malzinger/klarsicht@v1\n  with:\n    url: https://preview.example.com\n    threshold: 90'
 
 const FEATURES = [
   [
@@ -24,6 +26,10 @@ const FEATURES = [
   [
     'Privacy by design',
     'Uses the activeTab permission by default, host access only if you grant it, runs entirely in your browser and never sends a byte anywhere.',
+  ],
+  [
+    'CI gate',
+    'The same scan runs headless in GitHub Actions: it comments score and top fixes on every pull request and fails the build below your threshold.',
   ],
   [
     'Open source',
@@ -65,6 +71,7 @@ export function Landing() {
         <nav className="site__nav" aria-label="Site">
           <a href="#demo">Demo</a>
           <a href="#install">Install</a>
+          <a href="#ci">CI</a>
           <a href="#how">How it works</a>
           <a href={REPO} target="_blank" rel="noreferrer">
             GitHub ↗
@@ -145,6 +152,19 @@ export function Landing() {
             Chrome 116 or newer, also works in Edge and Brave. A Web Store listing is on the
             roadmap.
           </p>
+        </section>
+
+        <section className="ci" id="ci" aria-labelledby="ci-title">
+          <h2 id="ci-title">In your pipeline</h2>
+          <p className="section__intro">
+            One step in a workflow scans a preview URL or a locally served build, posts the score
+            with the top fixes as a pull-request comment and fails the job below the threshold. The
+            CLI behind it works on its own too:{' '}
+            <code>npx klarsicht https://example.com --threshold 90</code>.
+          </p>
+          <pre className="snippet-block">
+            <code>{SNIPPET}</code>
+          </pre>
         </section>
 
         <section className="how" id="how" aria-labelledby="how-title">

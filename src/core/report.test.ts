@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import type { ScanResult } from '../shared/types'
-import { buildHtmlReport, buildJsonReport, buildSummary, escapeHtml } from './report'
+import {
+  buildHtmlReport,
+  buildJsonReport,
+  buildMarkdownReport,
+  buildSummary,
+  escapeHtml,
+} from './report'
 
 const result: ScanResult = {
   url: 'https://example.com/shop',
@@ -62,5 +68,23 @@ describe('buildJsonReport / buildSummary', () => {
     const summary = buildSummary(result, 'en')
     expect(summary).toContain('Score 90/100 (Good)')
     expect(summary).toContain('- [Critical] Images must have alternate text (1)')
+  })
+})
+
+describe('buildMarkdownReport', () => {
+  it('renders a marker, a table and the top fixes', () => {
+    const md = buildMarkdownReport(result, 'en', 80)
+    expect(md.startsWith('<!-- klarsicht-report -->')).toBe(true)
+    expect(md).toContain('**Score 90/100 · Good ✅**')
+    expect(md).toContain('| Critical | Images must have alternate text | 1 | 1.1.1 |')
+    expect(md).toContain('<details><summary>How to fix</summary>')
+    expect(md).toContain('alt="What the image shows"')
+  })
+
+  it('marks a failed threshold and escapes pipes', () => {
+    const md = buildMarkdownReport({ ...result, title: 'A | B' }, 'de', 95)
+    expect(md).toContain('❌')
+    expect(md).toContain('A &#124; B')
+    expect(md).toContain('Schwelle: 95')
   })
 })

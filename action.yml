@@ -1,0 +1,95 @@
+name: 'Klarsicht accessibility gate'
+description: 'Scan a page against WCAG 2.2, comment score and fixes on the pull request and fail below a threshold.'
+author: 'Friedrich Malz'
+branding:
+  icon: 'eye'
+  color: 'green'
+
+inputs:
+  url:
+    description: 'URL to scan, for example a preview deployment or a locally served build'
+    required: true
+  standard:
+    description: 'wcag22aa, wcag21aa (BFSG / EN 301 549) or wcag22aa-bp'
+    default: 'wcag22aa'
+  threshold:
+    description: 'Minimum score (0-100) the page must reach'
+    default: '80'
+  lang:
+    description: 'Language of rule texts and the comment: en or de'
+    default: 'en'
+  comment:
+    description: 'Post or update a comment on the pull request'
+    default: 'true'
+  token:
+    description: 'Token used for the comment'
+    default: ${{ github.token }}
+
+outputs:
+  score:
+    description: 'Lowest score across the scanned pages'
+    value: ${{ steps.scan.outputs.score }}
+  grade:
+    description: 'Grade A to D for that score'
+    value: ${{ steps.scan.outputs.grade }}
+  passed:
+    description: 'true when the score reached the threshold'
+    value: ${{ steps.scan.outputs.passed }}
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 22
+
+    - name: Build the scanner
+      shell: bash
+      run: |
+        cd "${{ github.action_path }}"
+        npm ci --no-audit --no-fund
+        npm run build
+        npx playwright install --with-deps chromium
+
+    - name: Scan
+      id: scan
+      shell: bash
+      continue-on-error: true
+      run: >
+        node "${{ github.action_path }}/cli/klarsicht.js" "${{ inputs.url }}"
+        --standard "${{ inputs.standard }}" --threshold "${{ inputs.threshold }}"
+        --lang "${{ inputs.lang }}" --out klarsicht-out
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: klarsicht-report
+        path: klarsicht-out
+        if-no-files-found: ignore
+
+    - name: Comment on the pull request
+      if: inputs.comment == 'true' && github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ inputs.token }}
+        script: |
+          const fs = require('fs');
+          const file = '${{ steps.scan.outputs.summary }}';
+          if (!file || !fs.existsSync(file)) { core.warning('Klarsicht: no summary to post'); return; }
+          const body = fs.readFileSync(file, 'utf8');
+          const marker = '<!-- klarsicht-report -->';
+          const { owner, repo } = context.repo;
+          const issue_number = context.payload.pull_request.number;
+          const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number, per_page: 100 });
+          const existing = comments.find((c) => c.body && c.body.includes(marker));
+          if (existing) {
+            await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+          } else {
+            await github.rest.issues.createComment({ owner, repo, issue_number, body });
+          }
+
+    - name: Enforce the threshold
+      if: steps.scan.outputs.passed != 'true'
+      shell: bash
+      run: |
+        echo "::error::Klarsicht: score ${{ steps.scan.outputs.score }} is below the threshold ${{ inputs.threshold }}"
+        exit 1
