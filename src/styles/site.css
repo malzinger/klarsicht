@@ -216,3 +216,28 @@ section h2 {
     display: none;
   }
 }
+
+.ci {
+  padding: 40px 0;
+  border-top: 1px solid var(--line);
+}
+
+.ci .section__intro {
+  margin-bottom: 14px;
+  color: var(--ink-2);
+}
+
+.ci code {
+  font-family: var(--mono);
+  font-size: 13px;
+}
+
+.snippet-block {
+  margin: 0;
+  padding: 16px 18px;
+  border-radius: 12px;
+  background: var(--ink);
+  color: var(--bg);
+  font: 13px/1.6 var(--mono);
+  overflow-x: auto;
+}

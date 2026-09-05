@@ -18,7 +18,7 @@ export function escapeHtml(value: string): string {
 }
 
 export function buildJsonReport(result: ScanResult): string {
-  return JSON.stringify({ tool: 'Klarsicht', version: '0.1.3', ...result }, null, 2)
+  return JSON.stringify({ tool: 'Klarsicht', version: '0.2.0', ...result }, null, 2)
 }
 
 /** Plain-text summary for the clipboard. */
@@ -99,4 +99,61 @@ ${sections || `<p>${t('result.clean', lang)}</p>`}
 </main>
 </body>
 </html>`
+}
+
+/** Marker that lets a bot find and update its own pull-request comment. */
+export const MARKDOWN_MARKER = '<!-- klarsicht-report -->'
+
+const cell = (value: string): string => value.replace(/\|/g, '&#124;').replace(/\r?\n/g, ' ')
+const FENCE = '```'
+
+/** Pull-request friendly Markdown with a findings table and the top fixes. */
+export function buildMarkdownReport(result: ScanResult, lang: Lang, threshold?: number): string {
+  const score = computeScore(result.violations)
+  const standard = getStandard(result.standard)
+  const findings = sortFindings(result.violations)
+  const status = threshold === undefined ? '' : score.score >= threshold ? ' ✅' : ' ❌'
+  const rows = findings.map((finding) => {
+    const criteria =
+      criteriaFor(finding.tags)
+        .map((criterion) => criterion.number)
+        .join(', ') || '–'
+    return `| ${t(`impact.${finding.impact}`, lang)} | ${cell(finding.help)} | ${finding.nodes.length} | ${criteria} |`
+  })
+  const fixes = findings.slice(0, 5).flatMap((finding) => {
+    const first = finding.nodes[0]
+    const fix = first ? getFix(finding, first, lang) : null
+    if (!fix) return []
+    const code = fix.code ? `\n  ${FENCE}\n  ${fix.code.split('\n').join('\n  ')}\n  ${FENCE}` : ''
+    return [`- **${cell(finding.help)}**: ${cell(fix.summary)}${code}`]
+  })
+  const when = new Date(result.timestamp).toISOString().slice(0, 16).replace('T', ' ')
+  const table =
+    rows.length > 0
+      ? [
+          `| ${t('report.impact', lang)} | ${t('report.rule', lang)} | ${t('result.elements', lang)} | WCAG |`,
+          '| --- | --- | ---: | --- |',
+          ...rows,
+        ].join('\n')
+      : t('result.clean', lang)
+
+  const lines = [
+    MARKDOWN_MARKER,
+    `### ${t('report.title', lang)}: ${cell(result.title || result.url)}`,
+    `**${t('result.score', lang)} ${score.score}/100 · ${t(`grade.${score.grade}`, lang)}${status}** · ${standard.label[lang]} · ${result.violations.length} ${t('result.rules', lang)} · ${score.elements} ${t('result.elements', lang)} · ${result.passes.length} ${t('result.passes', lang)}`,
+  ]
+  if (threshold !== undefined) lines.push(`${t('report.threshold', lang)}: ${threshold}`)
+  lines.push('', table)
+  if (fixes.length > 0) {
+    lines.push(
+      '',
+      `<details><summary>${t('section.fix', lang)}</summary>`,
+      '',
+      ...fixes,
+      '',
+      '</details>',
+    )
+  }
+  lines.push('', `<sub>${t('report.generated', lang)} · ${cell(result.url)} · ${when} UTC</sub>`)
+  return lines.join('\n')
 }
