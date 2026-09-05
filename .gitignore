@@ -47,7 +47,7 @@ klarsicht-extension.zip
 public/agent.js
 public/background.js
 public/axe.min.js
-cli/
+/cli/
 
 # CLI output
 klarsicht-out/
