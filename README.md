@@ -78,6 +78,8 @@ The same agent runs headless through Playwright, so a pull request can be gated 
     threshold: 90
 ```
 
+![Klarsicht comment on a pull request: score 100/100 for WCAG 2.2 AA](docs/pr-comment.png)
+
 Inputs: `url`, `standard` (`wcag22aa`, `wcag21aa`, `wcag22aa-bp`), `threshold`, `lang`, `comment`, `token`. Outputs: `score`, `grade`, `passed`. This repository gates itself: every pull request scans the built landing page (see `.github/workflows/a11y-gate.yml`).
 
 The CLI works on its own as well:

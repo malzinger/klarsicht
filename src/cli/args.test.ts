@@ -14,9 +14,25 @@ describe('parseArgs', () => {
   })
 
   it('reads options in any order and keeps several urls', () => {
-    const options = parseArgs(['--lang', 'de', 'https://a.test', '--threshold', '95', 'https://b.test', '--standard', 'wcag21aa', '--channel', 'msedge'])
+    const options = parseArgs([
+      '--lang',
+      'de',
+      'https://a.test',
+      '--threshold',
+      '95',
+      'https://b.test',
+      '--standard',
+      'wcag21aa',
+      '--channel',
+      'msedge',
+    ])
     expect(options.urls).toEqual(['https://a.test', 'https://b.test'])
-    expect(options).toMatchObject({ lang: 'de', threshold: 95, standard: 'wcag21aa', channel: 'msedge' })
+    expect(options).toMatchObject({
+      lang: 'de',
+      threshold: 95,
+      standard: 'wcag21aa',
+      channel: 'msedge',
+    })
   })
 
   it('rejects bad input', () => {

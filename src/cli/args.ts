@@ -50,7 +50,8 @@ export function parseArgs(argv: readonly string[]): CliOptions {
       }
       case '--threshold': {
         const value = Number(next())
-        if (!Number.isFinite(value) || value < 0 || value > 100) throw new Error('Threshold must be 0-100')
+        if (!Number.isFinite(value) || value < 0 || value > 100)
+          throw new Error('Threshold must be 0-100')
         threshold = value
         break
       }

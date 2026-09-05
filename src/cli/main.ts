@@ -41,10 +41,8 @@ async function scanUrl(url: string, options: CliOptions): Promise<ScanResult> {
     await page.addScriptTag({ path: AXE })
     await page.addScriptTag({ path: AGENT })
     const scanOptions: ScanOptions = { standard: options.standard, lang: options.lang }
-    const outcome = (await page.evaluate(
-      (opts) => window.__klarsicht?.scan(opts),
-      scanOptions,
-    )) as ScanOutcome | undefined
+    const outcome = (await page.evaluate((opts) => window.__klarsicht?.scan(opts), scanOptions)) as
+      ScanOutcome | undefined
     if (!outcome) throw new Error('The agent did not return a result')
     if ('error' in outcome) throw new Error(outcome.error)
     return outcome
@@ -78,7 +76,11 @@ interface ReportFiles {
   readonly md: string
 }
 
-async function writeReports(result: ScanResult, options: CliOptions, index: number): Promise<ReportFiles> {
+async function writeReports(
+  result: ScanResult,
+  options: CliOptions,
+  index: number,
+): Promise<ReportFiles> {
   await mkdir(options.out, { recursive: true })
   const base = join(options.out, `klarsicht-${index + 1}-${slug(result.url)}`)
   const files: ReportFiles = { html: `${base}.html`, json: `${base}.json`, md: `${base}.md` }
